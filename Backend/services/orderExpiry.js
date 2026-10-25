@@ -72,7 +72,52 @@ export const expirePendingOrders = async (batchSize = 50) => {
 
 export const startOrderExpiryWorker = () => {
   const run = () => expirePendingOrders().catch((error) => {
-    console.error("Pending order expiry worker failed", error.code || "database error");
+    const databaseUrl = process.env.DATABASE_URL;
+    const databaseUrlPresent = Boolean(databaseUrl);
+    const connectionMethod = databaseUrlPresent ? "DATABASE_URL" : "DB_*";
+    let databaseHostname = null;
+    let databasePort = null;
+
+    if (databaseUrlPresent) {
+      try {
+        const parsedUrl = new URL(databaseUrl);
+        databaseHostname = parsedUrl.hostname || null;
+        databasePort = parsedUrl.port || "5432";
+      } catch {
+        // Keep malformed connection strings out of logs; report endpoint as unavailable.
+      }
+    } else {
+      const configuredHost = process.env.DB_HOST || "localhost";
+      databaseHostname = /^[A-Za-z0-9.-]+$/.test(configuredHost) || /^[0-9A-Fa-f:]+$/.test(configuredHost)
+        ? configuredHost
+        : null;
+      const configuredPort = process.env.DB_PORT || "5432";
+      databasePort = /^\d{1,5}$/.test(configuredPort) && Number(configuredPort) <= 65535
+        ? configuredPort
+        : null;
+    }
+
+    let errorMessage = typeof error?.message === "string" ? error.message : null;
+    if (errorMessage && databaseUrl) {
+      errorMessage = errorMessage.split(databaseUrl).join("[redacted database connection string]");
+    }
+    if (errorMessage) {
+      errorMessage = errorMessage.replace(/postgres(?:ql)?:\/\/[^\s"'<>]+/gi, "[redacted database connection string]");
+    }
+
+    const errorDetails = {};
+    for (const key of ["code", "message", "syscall", "address", "port"]) {
+      const value = key === "message" ? errorMessage : error?.[key];
+      if (value !== undefined && value !== null) errorDetails[key] = value;
+    }
+
+    console.error("DATABASE_DIAGNOSTIC", {
+      databaseUrlPresent,
+      connectionMethod,
+      databaseHostname,
+      databasePort,
+      error: errorDetails,
+    });
   });
   void run();
   const timer = setInterval(run, 60_000);
