@@ -1,4 +1,5 @@
 import express from "express";
+import pool from "./config/db.js";
 import auth from "./routes/authRoute.js";
 import category from "./routes/categoryRoutes.js";
 import product from "./routes/productRoutes.js";
@@ -134,6 +135,65 @@ app.use("/api/support", supportRoutes);
 
 app.use("/api/trueanalytics", trueanalyticsRoutes);
 
+// TEMPORARY database connectivity diagnostic; remove after troubleshooting.
+app.get("/api/health/db", async (_req, res) => {
+  let client;
+  const databaseUrl = process.env.DATABASE_URL;
+  const databaseUrlPresent = Boolean(databaseUrl);
+  const connectionMethod = databaseUrlPresent ? "DATABASE_URL" : "DB_*";
+  let databaseHostname = null;
+  let databasePort = null;
+
+  if (databaseUrlPresent) {
+    try {
+      const parsedUrl = new URL(databaseUrl);
+      databaseHostname = parsedUrl.hostname || null;
+      databasePort = parsedUrl.port || "5432";
+    } catch {
+      // Leave endpoint fields null when the configured URL is malformed.
+    }
+  } else {
+    const configuredHost = process.env.DB_HOST || "localhost";
+    databaseHostname = /^[A-Za-z0-9.-]+$/.test(configuredHost) || /^[0-9A-Fa-f:]+$/.test(configuredHost)
+      ? configuredHost
+      : null;
+    const configuredPort = process.env.DB_PORT || "5432";
+    databasePort = /^\d{1,5}$/.test(configuredPort) && Number(configuredPort) <= 65535
+      ? configuredPort
+      : null;
+  }
+
+  try {
+    client = await pool.connect();
+    await client.query({ text: "SELECT 1 AS database_connected", query_timeout: 5000 });
+    return res.status(200).json({ databaseConnected: true });
+  } catch (error) {
+    let errorMessage = typeof error?.message === "string" ? error.message : null;
+    if (errorMessage && databaseUrl) {
+      errorMessage = errorMessage.split(databaseUrl).join("[redacted database connection string]");
+    }
+    if (errorMessage) {
+      errorMessage = errorMessage.replace(/postgres(?:ql)?:\/\/[^\s"'<>]+/gi, "[redacted database connection string]");
+    }
+
+    const errorDetails = {};
+    for (const key of ["code", "message", "syscall", "address", "port"]) {
+      const value = key === "message" ? errorMessage : error?.[key];
+      if (value !== undefined && value !== null) errorDetails[key] = value;
+    }
+
+    console.error("DATABASE_HEALTH_DIAGNOSTIC", {
+      databaseUrlPresent,
+      connectionMethod,
+      databaseHostname,
+      databasePort,
+      error: errorDetails,
+    });
+    return res.status(503).json({ error: "Database unavailable" });
+  } finally {
+    if (client) client.release();
+  }
+});
 // =========================
 // 404 HANDLER
 // =========================
