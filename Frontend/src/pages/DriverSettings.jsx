@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import ThemeToggle from "../components/ThemeToggle.jsx";
 import DriverHeader from "../components/driver/DriverHeader.jsx";
 import API from "../../API/api.js";
+import ProfileAvatar from "@/components/customer/ProfileAvatar.jsx";
 import { playAssignmentSound } from "./driverPortalUtils.js";
 import { useDriverPreferences } from "./driverPreferences.js";
 import { decodeVapidPublicKey, getDriverPushState, setDriverPushRegistered } from "./driverPushNotifications.js";
@@ -206,7 +207,7 @@ const DriverSettings = ({ user, setUser }) => {
             <Input id="driver-avatar" type="file" accept="image/*" onChange={selectAvatar} />
             <FieldDescription>Choose an image to update your account picture.</FieldDescription>
           </Field>
-          {(preview || profile.avatar) && <img src={preview || profile.avatar} alt="Profile preview" className="size-28 rounded-2xl border object-cover" />}
+          <ProfileAvatar src={preview || profile.avatar} alt="Profile preview" className="size-28 rounded-2xl border" />
           <div className="space-y-3 border-t pt-5"><h3 className="font-semibold">Change password</h3><div className="grid gap-3 sm:grid-cols-3">
             <Input aria-label="Current password" type="password" autoComplete="current-password" placeholder="Current password" value={passwords.currentPassword} onChange={(event) => setPasswords({ ...passwords, currentPassword: event.target.value })} />
             <Input aria-label="New password" type="password" autoComplete="new-password" placeholder="New password" value={passwords.newPassword} onChange={(event) => setPasswords({ ...passwords, newPassword: event.target.value })} />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import API from "../../../API/api.js";
+import ProfileAvatar from "@/components/customer/ProfileAvatar.jsx";
 
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -355,21 +356,7 @@ const Customers = () => {
               gap-4
               "
               >
-                <img
-                  src={
-                    user.avatar ||
-                    `https://ui-avatars.com/api/?name=${user.name}`
-                  }
-                  alt={user.name}
-                  className="
-                w-16
-                h-16
-                rounded-full
-                object-cover
-                border
-                border-border
-                "
-                />
+                <ProfileAvatar src={user.avatar} alt={user.name} className="size-16 rounded-full border border-border" />
 
                 <div>
                   <h2

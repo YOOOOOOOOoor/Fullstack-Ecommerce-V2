@@ -153,11 +153,12 @@
   opacity: 0;
   transition: grid-template-rows 220ms ease, opacity 180ms ease;
 }
-details[open] .customer-faq-panel { grid-template-rows: minmax(0, 1fr); opacity: 1; }
-details[open] .customer-faq-chevron { transform: rotate(180deg); }
+.customer-faq-panel.is-open { grid-template-rows: minmax(0, 1fr); opacity: 1; }
+.customer-faq-chevron { transition: transform 200ms ease; }
+.customer-faq-chevron.is-open { transform: rotate(180deg); }
 
 @media (prefers-reduced-motion: reduce) {
-  .sliding-nav-indicator, .customer-accordion-grid, .customer-faq-panel { transition-duration: 1ms; }
+  .sliding-nav-indicator, .customer-accordion-grid, .customer-faq-panel, .customer-faq-chevron { transition-duration: 1ms; }
 }
 
 @layer base {

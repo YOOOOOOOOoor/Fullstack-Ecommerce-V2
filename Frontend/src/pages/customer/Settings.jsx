@@ -2,6 +2,7 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import API from "../../../API/api.js";
+import ProfileAvatar from "@/components/customer/ProfileAvatar.jsx";
 import { toast } from "sonner";
 
 const Settings = () => {
@@ -235,21 +236,7 @@ const Settings = () => {
               </FieldDescription>
             </Field>
 
-            {(preview || settings.avatar) && (
-              <img
-                src={preview || settings.avatar}
-                alt={settings.name}
-                className="
-              h-32
-              w-32
-              sm:h-40
-              sm:w-40
-              rounded-2xl
-              object-cover
-              border
-              "
-              />
-            )}
+            <ProfileAvatar src={preview || settings.avatar} alt={settings.name || "Profile picture"} className="size-32 rounded-2xl border sm:size-40" />
           </div>
         </div>
 

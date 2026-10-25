@@ -324,7 +324,7 @@ const Products = () => {
 
       <Card className="overflow-hidden">
         <CardHeader className="flex flex-col gap-3 border-b py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div><CardTitle>Product catalog</CardTitle><CardDescription className="mt-1">{loading ? "Loading productsâ€¦" : `Page ${page} of ${totalPages} Â· ${total.toLocaleString()} total`}</CardDescription></div>
+          <div><CardTitle>Product catalog</CardTitle><CardDescription className="mt-1">{loading ? "Loading productsâ€¦" : `Page ${page} of ${totalPages} | ${total.toLocaleString()} total`}</CardDescription></div>
           <TooltipProvider>
             <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
               <div className="flex items-center rounded-lg border bg-muted/40 p-0.5" aria-label="Product view">

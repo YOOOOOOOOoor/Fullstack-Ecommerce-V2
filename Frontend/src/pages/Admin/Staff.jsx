@@ -7,6 +7,9 @@ const Staff = () => {
   const [permissionOptions, setPermissionOptions] = useState([]);
   const [drafts, setDrafts] = useState({});
   const [userId, setUserId] = useState("");
+  const [accountSearch, setAccountSearch] = useState("");
+  const [availableAccounts, setAvailableAccounts] = useState([]);
+  const [accountsLoading, setAccountsLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
     const result = await API.get("/admin/staff");
@@ -24,6 +27,25 @@ const Staff = () => {
     }).catch((error) => { if (active) toast.error(error.response?.data?.message || "Could not load staff permissions."); });
     return () => { active = false; };
   }, []);
+  useEffect(() => {
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      setAccountsLoading(true);
+      try {
+        const result = await API.get("/admin/customers", {
+          params: { page: 1, limit: 100, search: accountSearch, role: "customer" },
+        });
+        if (active) {
+          setAvailableAccounts((result.data.users || []).filter((account) => account.account_type === "customer"));
+        }
+      } catch (error) {
+        if (active) toast.error(error.response?.data?.message || "Could not load customer accounts.");
+      } finally {
+        if (active) setAccountsLoading(false);
+      }
+    }, 250);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [accountSearch]);
   const save = async (member) => {
     try {
       setBusy(true);
@@ -39,6 +61,7 @@ const Staff = () => {
       setBusy(true);
       await API.post(`/admin/staff/${userId}`, {});
       setUserId("");
+      setAvailableAccounts((accounts) => accounts.filter((account) => String(account.id) !== userId));
       toast.success("Staff account created with no permissions. Grant only the access it needs.");
       await load();
     } catch (error) { toast.error(error.response?.data?.message || "Could not appoint this staff account."); }
@@ -48,10 +71,17 @@ const Staff = () => {
   const field = "min-h-11 rounded-lg border bg-background px-3 py-2 text-sm";
   return <main className="space-y-6">
     <header><h1 className="text-3xl font-bold">Staff Permissions</h1><p className="mt-1 text-muted-foreground">Super Admin controls staff activation and least-privilege access.</p></header>
-    <form onSubmit={appoint} className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-[1fr_2fr_auto]">
-      <input className={field} value={userId} onChange={(event) => setUserId(event.target.value)} required inputMode="numeric" aria-label="Existing customer account ID" placeholder="Existing account ID" />
-      <button className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground" disabled={busy}>Appoint staff</button>
-      <p className="text-xs text-muted-foreground sm:col-span-3">Appointing changes the existing account to the admin login role; the new staff member receives no operational permissions until you grant them.</p>
+    <form onSubmit={appoint} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] md:items-end">
+      <label htmlFor="staff-account-search" className="space-y-1.5 text-sm font-medium">Find customer
+        <input id="staff-account-search" type="search" className={"w-full " + field} value={accountSearch} onChange={(event) => { setAccountSearch(event.target.value); setUserId(""); }} placeholder="Search by name or email" autoComplete="off" />
+      </label>
+      <label htmlFor="staff-account-select" className="space-y-1.5 text-sm font-medium">Customer account
+        <select id="staff-account-select" className={"w-full " + field} value={userId} onChange={(event) => setUserId(event.target.value)} required disabled={accountsLoading}>
+          <option value="" disabled>{accountsLoading ? "Loading accounts…" : availableAccounts.length ? "Choose an account" : "No matching customer accounts"}</option>
+          {availableAccounts.map((account) => <option key={account.id} value={account.id}>{account.name} — {account.email}</option>)}
+        </select>
+      </label>
+      <button className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50" disabled={busy || accountsLoading || !userId}>Grant staff access</button>
     </form>
     {staff.filter((member) => !member.is_super_admin).map((member) => {
       const draft = drafts[member.id] || { status: member.status || "active", permissions: [] };

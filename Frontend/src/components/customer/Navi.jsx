@@ -23,6 +23,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
+import ProfileAvatar from "./ProfileAvatar.jsx";
 import { useCustomerShop } from "../../context/CustomerShopContext.jsx";
 
 const routeIsActive = (pathname, path) =>
@@ -382,16 +383,7 @@ const Navi = ({ user, setUser }) => {
                       transition
                     "
                   >
-                    <img
-                      src={user.avatar}
-                      alt="Profile"
-                      className="
-                        w-9
-                        h-9
-                        rounded-full
-                        object-cover
-                      "
-                    />
+                    <ProfileAvatar src={user.avatar} alt={user.name || "Profile"} className="size-9 rounded-full border" />
 
                     <ChevronDown size={16} className="hidden sm:block" />
                   </button>

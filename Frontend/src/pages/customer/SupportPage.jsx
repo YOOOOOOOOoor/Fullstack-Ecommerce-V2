@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import API from "../../../API/api.js";
 import { toast } from "sonner";
 
@@ -12,6 +13,7 @@ const SupportPage = ({ adminMode = false }) => {
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [openFaqId, setOpenFaqId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -88,7 +90,31 @@ const SupportPage = ({ adminMode = false }) => {
       </form>
       <div className="space-y-2 border-t pt-5">{faqs.map((faq, index) => <div key={faq.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"><div><p className="font-medium">{faq.question}</p><p className="text-xs text-muted-foreground">{faq.is_published ? "Published" : "Draft"}</p></div><div className="flex flex-wrap gap-2"><button disabled={saving || index === 0} className="rounded border px-2 py-1 text-sm disabled:opacity-40" aria-label="Move FAQ up" onClick={() => moveFaq(index, -1)}>↑</button><button disabled={saving || index === faqs.length - 1} className="rounded border px-2 py-1 text-sm disabled:opacity-40" aria-label="Move FAQ down" onClick={() => moveFaq(index, 1)}>↓</button><button className="rounded border px-3 py-1 text-sm" onClick={() => toggleFaq(faq)}>{faq.is_published ? "Unpublish" : "Publish"}</button><button className="rounded border px-3 py-1 text-sm" onClick={() => editFaq(faq)}>Edit</button><button className="rounded border border-destructive px-3 py-1 text-sm text-destructive" onClick={() => deleteFaq(faq)}>Delete</button></div></div>)}</div>
     </section>}
-    <section aria-labelledby="faq-list-heading"><h2 id="faq-list-heading" className="mb-4 text-xl font-semibold">Frequently asked questions</h2>{loading ? <p className="rounded-xl border bg-card p-6 text-muted-foreground">Loading support information…</p> : faqs.length ? <div className="space-y-3">{faqs.map((faq) => <details key={faq.id} className="group rounded-xl border bg-card p-5"><summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-4 font-medium marker:hidden focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"><span>{faq.question}</span><span aria-hidden="true" className="customer-faq-chevron shrink-0 text-muted-foreground transition-transform duration-200">⌄</span></summary><div className="customer-faq-panel"><div className="min-h-0 overflow-hidden"><p className="whitespace-pre-wrap pt-3 text-sm leading-6 text-muted-foreground">{faq.answer}</p></div></div></details>)}</div> : <p className="rounded-xl border bg-card p-6 text-muted-foreground">Support information is temporarily unavailable.</p>}</section>
+    <section aria-labelledby="faq-list-heading"><h2 id="faq-list-heading" className="mb-4 text-xl font-semibold">Frequently asked questions</h2>{loading ? <p className="rounded-xl border bg-card p-6 text-muted-foreground">Loading support information…</p> : faqs.length ? <div className="space-y-3">{faqs.map((faq) => {
+          const isOpen = openFaqId === faq.id;
+          const panelId = "customer-faq-" + faq.id;
+          return (
+            <div key={faq.id} className="overflow-hidden rounded-xl border bg-card">
+              <h3>
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => setOpenFaqId((currentId) => currentId === faq.id ? null : faq.id)}
+                  className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-4 text-left font-medium transition-colors hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+                >
+                  <span>{faq.question}</span>
+                  <ChevronDown aria-hidden="true" className={"customer-faq-chevron size-5 shrink-0 text-muted-foreground " + (isOpen ? "is-open" : "")} />
+                </button>
+              </h3>
+              <div id={panelId} className={"customer-faq-panel " + (isOpen ? "is-open" : "")} aria-hidden={!isOpen} inert={!isOpen}>
+                <div className="min-h-0 overflow-hidden">
+                  <p className="whitespace-pre-wrap px-5 pb-5 text-sm leading-6 text-muted-foreground">{faq.answer}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}</div> : <p className="rounded-xl border bg-card p-6 text-muted-foreground">Support information is temporarily unavailable.</p>}</section>
     <section className="rounded-2xl border bg-card p-5 sm:p-7"><h2 className="text-xl font-semibold">Contact the store</h2><p className="mt-2 text-sm text-muted-foreground">For help with your order, contact us using the details configured by the store.</p><div className="mt-4 flex flex-wrap gap-4 text-sm">{contact.support_email && <a className="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" href={`mailto:${contact.support_email}`}>{contact.support_email}</a>}{contact.support_phone && <a className="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" href={`tel:${contact.support_phone}`}>{contact.support_phone}</a>}{!contact.support_email && !contact.support_phone && <p className="text-muted-foreground">Contact details have not been configured yet.</p>}</div></section>
   </main>;
 };

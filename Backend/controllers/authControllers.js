@@ -11,9 +11,6 @@ const router = express.Router();
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const DEFAULT_AVATAR =
-  "https://res.cloudinary.com/xqjlg4ei/image/upload/v1782918066/Sample_User_Icon_yqt0wv.png";
-
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -59,7 +56,7 @@ export const register = async (req, res, next) => {
       email.toLowerCase().trim(),
       hashPass,
       phone,
-      avatar || DEFAULT_AVATAR,
+      avatar || null,
       "local",
     ],
   );
@@ -208,7 +205,7 @@ export const googleLogin = async (req, res) => {
           name,
           email.toLowerCase().trim(),
           null,
-          picture || DEFAULT_AVATAR,
+          picture || null,
           "google",
         ],
       );
