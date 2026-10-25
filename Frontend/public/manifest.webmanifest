@@ -1,0 +1,12 @@
+{
+  "name": "Yordi Store Driver Portal",
+  "short_name": "Driver Portal",
+  "start_url": "/driver/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F5F2EA",
+  "theme_color": "#F5F2EA",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
