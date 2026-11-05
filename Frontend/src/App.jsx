@@ -58,7 +58,6 @@ API.defaults.withCredentials = true;
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [countdown, setCountdown] = useState(25);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -75,37 +74,27 @@ function App() {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    if (!loading) return;
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 0) {
-          clearInterval(timer);
-          return 0;
-        }
-
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [loading]);
-
   if (loading)
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <Spinner className="size-8 mb-5" />
-
-        <h3 className="text-lg font-semibold">Waking up the server...</h3>
-
-        <p className="mt-2 max-w-md text-sm text-muted-foreground">
-          Please wait about{" "}
-          <span className="font-medium">{countdown} seconds</span> while the
-          free backend server starts. This only happens after the server has
-          been inactive for a while.
-        </p>
-      </div>
+      <main className="grid min-h-dvh place-items-center bg-background px-4 py-8">
+        <section
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+          aria-labelledby="startup-loading-title"
+          className="w-full max-w-md rounded-3xl border border-border bg-card px-6 py-10 text-center shadow-sm sm:px-10"
+        >
+          <span aria-hidden="true" className="mx-auto mb-6 grid size-16 place-items-center rounded-2xl bg-primary/10">
+            <Spinner aria-hidden="true" className="size-8 text-primary motion-reduce:animate-none" />
+          </span>
+          <h1 id="startup-loading-title" className="text-xl font-semibold text-foreground sm:text-2xl">
+            Waking up the server
+          </h1>
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base">
+            We’re connecting to the store and checking your session. This can take a little while if the server has been idle.
+          </p>
+        </section>
+      </main>
     );
 
   return (
