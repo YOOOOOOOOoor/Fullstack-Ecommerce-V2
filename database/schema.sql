@@ -36,7 +36,7 @@
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
-        password TEXT NOT NULL,
+        password TEXT,
         phone VARCHAR(20),
         avatar TEXT,
         avatar_public_id text,

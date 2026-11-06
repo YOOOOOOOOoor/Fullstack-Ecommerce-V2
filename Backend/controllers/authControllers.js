@@ -93,6 +93,10 @@ export const login = async (req, res, next) => {
       msg: "This account uses Google. Please continue with Google.",
     });
   }
+  // Never pass a missing password hash to bcrypt.compare.
+  if (!user.password) {
+    return res.status(400).json({ msg: "Invalid credentials" });
+  }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     return res.status(400).json({ msg: "Invalid credentials" });
@@ -160,14 +164,29 @@ export const googleLogin = async (req, res) => {
       });
     }
 
+    const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+    if (!googleClientId) {
+      return res.status(500).json({
+        msg: "Google authentication is not configured",
+      });
+    }
+
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      audience: googleClientId,
     });
 
     const payload = ticket.getPayload();
+    const email = typeof payload?.email === "string" ? payload.email.trim() : "";
+    const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const hasValidSubject = typeof payload?.sub === "string" && payload.sub.trim().length > 0;
+    if (!hasValidEmail || payload.email_verified !== true || !hasValidSubject) {
+      return res.status(401).json({
+        msg: "Google account could not be verified",
+      });
+    }
 
-    const { email, name, picture } = payload;
+    const { name, picture } = payload;
 
     let userResult = await pool.query("SELECT * FROM users WHERE email=$1", [
       email.toLowerCase().trim(),
