@@ -1,6 +1,7 @@
 import pool from "../config/db.js";
 import { fetchAnalyticsReport } from "../services/analyticsReport.js";
 import { createAnalyticsWorkbook } from "../services/analyticsWorkbook.js";
+import { fetchVisitorStatistics } from "../services/visitorAnalytics.js";
 
 const EXPORT_QUERY_KEYS = new Set(["range", "period", "month", "quarter", "year", "startDate", "endDate", "interval", "sort"]);
 
@@ -40,6 +41,19 @@ export const getAnalytics = async (req, res, next) => {
     delete dashboardReport.comparisonSeries;
     delete dashboardReport.storeName;
     return res.status(200).json(dashboardReport);
+  } catch (error) {
+    if (error instanceof TypeError || error instanceof RangeError) {
+      return res.status(400).json({ message: error.message });
+    }
+    return next(error);
+  }
+};
+
+export const getVisitorStatistics = async (req, res, next) => {
+  try {
+    validateExportQuery(req.query);
+    const report = await fetchVisitorStatistics(pool, req.query);
+    return res.status(200).json(report);
   } catch (error) {
     if (error instanceof TypeError || error instanceof RangeError) {
       return res.status(400).json({ message: error.message });

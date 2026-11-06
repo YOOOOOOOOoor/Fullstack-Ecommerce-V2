@@ -161,6 +161,10 @@ const Analytics = () => {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
   const [error, setError] = useState("");
+  const [visitorData, setVisitorData] = useState(null);
+  const [visitorLoading, setVisitorLoading] = useState(true);
+  const [visitorError, setVisitorError] = useState("");
+  const [visitorRequestVersion, setVisitorRequestVersion] = useState(0);
   const [analytics, setAnalytics] = useState({
     revenue: 0,
     orders: 0,
@@ -193,6 +197,11 @@ const Analytics = () => {
   });
   const [productSort, setProductSort] = useState("units");
   const requestParams = buildAnalyticsParams(activeFilter, productSort).toString();
+  const visitorParams = (() => {
+    const params = buildAnalyticsParams(activeFilter, productSort);
+    params.delete("sort");
+    return params.toString();
+  })();
   const activateFilter = (nextFilter) => {
     if (buildAnalyticsParams(nextFilter, productSort).toString() !== requestParams) {
       setLoading(true);
@@ -255,6 +264,35 @@ const Analytics = () => {
       controller.abort();
     };
   }, [requestParams, requestVersion]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    setVisitorLoading(true);
+    setVisitorError("");
+    const timer = setTimeout(async () => {
+      try {
+        const response = await API.get(`/trueanalytics/visitors?${visitorParams}`, { signal: controller.signal });
+        if (active) setVisitorData({
+          ...response.data,
+          trend: response.data.trend.map((item) => ({
+            ...item,
+            dateLabel: formatPeriodLabel(item.periodKey, response.data.period.interval),
+            visitors: Number(item.visitors) || 0,
+          })),
+        });
+      } catch (requestError) {
+        if (requestError.code !== "ERR_CANCELED" && active) setVisitorError("Visitor statistics could not be loaded.");
+      } finally {
+        if (active) setVisitorLoading(false);
+      }
+    }, 120);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [visitorParams, visitorRequestVersion]);
 
   const earliestDate = analytics.availableDateRange?.startDate ?? businessToday;
   const yearOptions = getReportingYears(analytics.availableDateRange, businessToday);
@@ -382,6 +420,8 @@ const Analytics = () => {
     setRequestVersion((version) => version + 1);
   };
 
+  const retryVisitorAnalytics = () => setVisitorRequestVersion((version) => version + 1);
+
   const metricComparison = (key, options = {}) => analytics.comparison
     ? <ComparisonIndicator metric={analytics.comparison.metrics[key]} label={analytics.comparison.label} {...options} />
     : analytics.comparisonUnavailable
@@ -389,12 +429,13 @@ const Analytics = () => {
       : null;
 
   if (!loading && error && !dataLoaded) {
-    return <div className="space-y-4 p-4 sm:p-6"><h1 className="text-2xl font-semibold">Store Analytics</h1><Alert variant="destructive"><AlertDescription className="flex flex-wrap items-center justify-between gap-3">{error}<Button variant="outline" onClick={retryAnalytics}>Try again</Button></AlertDescription></Alert></div>;
+    return <div className="space-y-6 p-4 sm:p-6"><h1 className="text-2xl font-semibold">Store Analytics</h1><Alert variant="destructive"><AlertDescription className="flex flex-wrap items-center justify-between gap-3">{error}<Button variant="outline" onClick={retryAnalytics}>Try again</Button></AlertDescription></Alert><VisitorAnalyticsSection data={visitorData} loading={visitorLoading} error={visitorError} onRetry={retryVisitorAnalytics} /></div>;
   }
 
   if (loading) {
     return (
       <div className="p-6 space-y-8">
+        <VisitorAnalyticsSection data={visitorData} loading={visitorLoading} error={visitorError} onRetry={retryVisitorAnalytics} />
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="space-y-3">
@@ -652,6 +693,8 @@ const Analytics = () => {
         </div>
       </div>
 
+      <VisitorAnalyticsSection data={visitorData} loading={visitorLoading} error={visitorError} onRetry={retryVisitorAnalytics} />
+
       {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
         <span>{error}</span>{" "}
         <button type="button" onClick={retryAnalytics} className="ml-2 font-semibold underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700">Try again</button>
@@ -769,6 +812,53 @@ const Card = ({ title, value, comparison }) => {
     </UiCard>
   );
 };
+
+const VisitorMetric = ({ title, value }) => (
+  <UiCard>
+    <CardHeader className="pb-0"><CardTitle className="text-sm text-muted-foreground">{title}</CardTitle></CardHeader>
+    <CardContent><p className="text-2xl font-bold tracking-tight">{Number(value || 0).toLocaleString()}</p></CardContent>
+  </UiCard>
+);
+
+const VisitorAnalyticsSection = ({ data, loading, error, onRetry }) => (
+  <section aria-label="Visitor analytics" className="space-y-4">
+    <div>
+      <h2 className="text-xl font-semibold tracking-tight text-foreground">Visitors</h2>
+      <p className="text-sm text-muted-foreground">Anonymous visitor activity for {data?.period?.label ?? "the selected period"}.</p>
+    </div>
+    {loading ? (
+      <div role="status" aria-live="polite" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"><span className="sr-only">Loading visitor statistics</span>{[1, 2, 3, 4, 5].map((item) => <Skeleton key={item} className="h-24 rounded-xl" />)}</div>
+    ) : error ? (
+      <Alert variant="destructive"><AlertDescription className="flex flex-wrap items-center justify-between gap-3">{error}<Button type="button" variant="outline" onClick={onRetry}>Try again</Button></AlertDescription></Alert>
+    ) : data && (
+      <>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <VisitorMetric title="Total Visitors" value={data.metrics.totalVisitors} />
+          <VisitorMetric title="New Visitors" value={data.metrics.newVisitors} />
+          <VisitorMetric title="Returning Visitors" value={data.metrics.returningVisitors} />
+          <VisitorMetric title="Total Sessions" value={data.metrics.totalSessions} />
+          <VisitorMetric title="Page Views" value={data.metrics.pageViews} />
+        </div>
+        <div className="chart-card">
+          <div className="mb-3"><h3 className="chart-title mb-1">Visitor Trend</h3><p className="text-sm text-muted-foreground">Distinct visitors per {data.period.interval} interval</p></div>
+          {data.trend.length === 0 ? <div className="flex h-[280px] items-center justify-center rounded-lg bg-muted/40 text-sm text-muted-foreground">No visitor activity recorded in this period.</div> : (
+            <ResponsiveContainer width="100%" height={280} minWidth={0}>
+              <AreaChart data={data.trend} margin={{ top: 8, right: 12, bottom: 8, left: 4 }}>
+                <defs><linearGradient id="visitorTrendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--chart-3)" stopOpacity={0.55} /><stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0.04} /></linearGradient></defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="dateLabel" interval={getChartTickInterval(data.trend.length)} minTickGap={24} tickMargin={9} height={36} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                <YAxis width={48} allowDecimals={false} tickMargin={8} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                <ChartTooltip labelFormatter={(_, payload) => payload?.[0]?.payload?.periodKey ? formatPeriodLabel(payload[0].payload.periodKey, data.period.interval, true) : ""} formatter={(value) => [Number(value).toLocaleString(), "Visitors"]} />
+                <Area isAnimationActive={false} type="monotone" dataKey="visitors" stroke="var(--chart-3)" strokeWidth={3} fill="url(#visitorTrendFill)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+          {data.history.partial && <p className="mt-2 text-xs text-muted-foreground">Some earlier visitor history is outside the 13-month retention window. The displayed period is partial.</p>}
+        </div>
+      </>
+    )}
+  </section>
+);
 
 const SecondaryMetric = ({ title, value, detail, tooltip }) => (
   <div className="rounded-xl border border-border bg-card p-3 text-card-foreground">

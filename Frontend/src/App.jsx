@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import API from "../API/api.js";
+import VisitorPageTracker from "./components/analytics/VisitorPageTracker.jsx";
 
 import { Spinner } from "@/components/ui/spinner";
 
@@ -55,7 +56,7 @@ import { canManageAdminSupport } from "./pages/adminSupportAccess.js";
 
 API.defaults.withCredentials = true;
 
-function App() {
+function AppContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -98,7 +99,7 @@ function App() {
     );
 
   return (
-    <Router>
+    <>
       <Routes>
         <Route path="/driver/login" element={<Login user={user} setUser={setUser} />} />
         <Route path="/driver/dashboard" element={<DriverRoute user={user}><DriverPortal user={user} setUser={setUser} /></DriverRoute>} />
@@ -240,6 +241,15 @@ function App() {
         </Route>
       </Routes>
       <Toaster richColors position="top-right" />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <VisitorPageTracker />
+      <AppContent />
     </Router>
   );
 }

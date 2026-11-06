@@ -22,6 +22,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
 import { startOrderExpiryWorker } from "./services/orderExpiry.js";
 import { startDriverPushWorker } from "./services/driverPushWorker.js";
+import { startVisitorRetentionWorker } from "./services/visitorAnalytics.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
@@ -244,6 +245,7 @@ seedAdmin()
   .then(() => {
     startOrderExpiryWorker();
     startDriverPushWorker();
+    startVisitorRetentionWorker();
     app.listen(PORT, () => {
       console.log(`Server is listening on port ${PORT}`);
     });
