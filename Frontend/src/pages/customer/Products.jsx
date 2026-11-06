@@ -44,6 +44,7 @@ import { SearchIcon } from "lucide-react";
 import { Heart } from "lucide-react";
 import { useCustomerShop } from "../../context/CustomerShopContext.jsx";
 import { toSelectItems } from "@/lib/selectOptions.js";
+import { formatCategoryName } from "@/lib/categoryDisplay.js";
 
 const Products = () => {
   const [loading, setLoading] = useState(false);
@@ -327,7 +328,7 @@ const Products = () => {
 
             <Select
               value={form.category}
-              items={toSelectItems([{ value: "all", label: "All Categories" }, ...category.map((c) => ({ value: c.id, label: c.name }))])}
+              items={toSelectItems([{ value: "all", label: "All Categories" }, ...category.map((c) => ({ value: c.id, label: formatCategoryName(c.name) }))])}
               onValueChange={(value) =>
                 setForm({
                   ...form,
@@ -350,7 +351,7 @@ const Products = () => {
 
                 {category.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
+                    {formatCategoryName(c.name)}
                   </SelectItem>
                 ))}
               </SelectContent>

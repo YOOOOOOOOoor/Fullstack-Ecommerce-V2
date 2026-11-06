@@ -1,4 +1,4 @@
-﻿import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Archive,
@@ -43,6 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toSelectItems } from "@/lib/selectOptions.js";
+import { formatCategoryName } from "@/lib/categoryDisplay.js";
 import {
   buildProductsQuery,
   createProductsPageState,
@@ -56,7 +57,7 @@ import {
 const stockFilters = [
   { value: "all", label: "All stock" },
   { value: "in_stock", label: "In stock" },
-  { value: "low_stock", label: "Low stock (1â€“10)" },
+  { value: "low_stock", label: "Low stock" },
   { value: "out_of_stock", label: "Out of stock" },
 ];
 
@@ -147,11 +148,9 @@ function ProductSkeleton({ view }) {
 function ProductToolbarButton({ label, active, icon: Icon, onClick }) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button type="button" variant={active ? "secondary" : "ghost"} size="icon-sm" aria-label={label} aria-pressed={active} onClick={onClick}>
+      <TooltipTrigger render={<Button type="button" variant={active ? "secondary" : "ghost"} size="icon-sm" aria-label={label} aria-pressed={active} onClick={onClick}>
           <Icon aria-hidden="true" />
-        </Button>
-      </TooltipTrigger>
+        </Button>} />
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   );
@@ -281,9 +280,9 @@ const Products = () => {
             </div>
             <div className="space-y-2">
               <label htmlFor="product-category" className="block text-sm font-medium leading-none">Category</label>
-              <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)} items={toSelectItems([{ value: "all", label: "All categories" }, ...categories.map((category) => ({ value: category.id, label: category.name }))])}>
+              <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)} items={toSelectItems([{ value: "all", label: "All categories" }, ...categories.map((category) => ({ value: category.id, label: formatCategoryName(category.name) }))])}>
                 <SelectTrigger id="product-category" aria-label="Filter by category" className="h-10 w-full rounded-xl text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="all">All categories</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>)}</SelectContent>
+                <SelectContent><SelectItem value="all">All categories</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={String(category.id)}>{formatCategoryName(category.name)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
@@ -356,7 +355,7 @@ const Products = () => {
                   const stock = stockInfo(product.stock);
                   return <TableRow key={product.id} className="hover:bg-muted/30">
                     <TableCell><div className="flex min-w-0 items-center gap-3"><ProductImage product={product} /><div className="min-w-0"><p className="max-w-64 truncate font-medium">{product.title || "Untitled product"}</p><p className="max-w-72 line-clamp-2 text-xs text-muted-foreground">{product.description || "No description"}</p></div></div></TableCell>
-                    <TableCell>{product.category_name ? <Badge variant="outline" className="max-w-36 truncate">{product.category_name}</Badge> : <span className="text-sm text-muted-foreground">Uncategorized</span>}</TableCell>
+                    <TableCell>{product.category_name ? <Badge variant="outline" className="max-w-36 truncate">{formatCategoryName(product.category_name)}</Badge> : <span className="text-sm text-muted-foreground">Uncategorized</span>}</TableCell>
                     <TableCell>{product.color ? <span className="flex items-center gap-2 text-sm"><span className="size-4 rounded-full border" style={{ backgroundColor: product.color }} aria-hidden="true" />{product.color}</span> : <span className="text-sm text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="whitespace-nowrap font-medium">{priceLabel(product.price)}</TableCell>
                     <TableCell><div className="flex items-center gap-2"><span className="font-medium tabular-nums">{stock.quantity}</span><Badge variant={stock.variant}>{stock.label}</Badge></div></TableCell>
@@ -376,7 +375,7 @@ const Products = () => {
                 <ProductImage product={product} grid />
                 <CardContent className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h3 className="truncate font-semibold">{product.title || "Untitled product"}</h3><p className="mt-1 line-clamp-2 min-h-10 text-sm text-muted-foreground">{product.description || "No description available."}</p></div><span className="shrink-0 font-semibold text-primary">{priceLabel(product.price)}</span></div>
-                  <div className="flex flex-wrap items-center gap-1.5"><ProductStatus product={product} /><Badge variant={stock.variant}>{stock.label}</Badge><Badge variant="outline">{product.category_name || "Uncategorized"}</Badge></div>
+                  <div className="flex flex-wrap items-center gap-1.5"><ProductStatus product={product} /><Badge variant={stock.variant}>{stock.label}</Badge><Badge variant="outline">{formatCategoryName(product.category_name) || "Uncategorized"}</Badge></div>
                   <div className="flex items-center justify-between gap-3 border-t pt-3 text-sm"><span className="flex min-w-0 items-center gap-2 truncate text-muted-foreground">{product.color ? <><span className="size-4 shrink-0 rounded-full border" style={{ backgroundColor: product.color }} aria-hidden="true" />{product.color}</> : "Color not set"}</span><span className="shrink-0">Stock <strong className="tabular-nums">{stock.quantity}</strong></span></div>
                   <div className="flex items-center justify-between gap-2"><span className="text-xs text-muted-foreground">Created {dateLabel(product.created_at)}</span><ProductActions product={product} onEdit={editProduct} onDelete={deleteProduct} deleting={deletingId === product.id} /></div>
                 </CardContent>

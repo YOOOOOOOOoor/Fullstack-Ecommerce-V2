@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import API from "../../../API/api.js";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const ShippingSettings = () => {
   const [fee, setFee] = useState("");
@@ -24,8 +26,8 @@ const ShippingSettings = () => {
   return <main className="mx-auto max-w-2xl space-y-6">
     <header><h1 className="text-3xl font-bold">Shipping Configuration</h1><p className="mt-1 text-muted-foreground">Set the default ETB delivery fee for new orders. Existing order totals remain unchanged.</p>{fee === "" && <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">No default fee is configured yet. Enter the initial fee to enable checkout.</p>}</header>
     <form onSubmit={save} className="space-y-4 rounded-2xl border bg-card p-6 shadow-sm">
-      <label className="block space-y-2 text-sm font-medium">Default shipping fee (ETB)<input className="min-h-11 w-full rounded-lg border bg-background px-3" type="number" min="0" step="0.01" value={fee} onChange={(event) => setFee(event.target.value)} required /></label>
-      <button className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground" disabled={busy}>{busy ? "Saving…" : "Save shipping fee"}</button>
+      <label className="block space-y-2 text-sm font-medium">Default shipping fee (ETB)<Input type="number" min="0" step="0.01" value={fee} onChange={(event) => setFee(event.target.value)} required /></label>
+      <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save shipping fee"}</Button>
     </form>
   </main>;
 };

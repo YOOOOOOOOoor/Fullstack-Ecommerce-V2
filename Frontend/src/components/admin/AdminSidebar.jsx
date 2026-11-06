@@ -31,21 +31,36 @@ import { hasAdminNavigationAccess } from "./adminNavigation";
 const data = {
   navMain: [
     {
-      title: "Store Management",
+      title: "OVERVIEW",
       items: [
         { title: "Dashboard", url: "/admin", icon: LayoutDashboard, permission: "view_dashboard" },
+      ],
+    },
+    {
+      title: "STORE",
+      items: [
         { title: "Products", url: "/admin/products", icon: Package, permission: "manage_products" },
         { title: "Categories", url: "/admin/category", icon: Tags, permission: "manage_products" },
+        { title: "Customers", url: "/admin/customers", icon: Users, permission: "manage_customers" },
+      ],
+    },
+    {
+      title: "OPERATIONS",
+      items: [
         { title: "Orders", url: "/admin/orders", icon: ShoppingCart, permission: "view_orders" },
-        { title: "Analytics", url: "/admin/analytics", icon: BarChart3, permission: "view_reports" },
-        {
-          title: "Customers",
-          url: "/admin/customers",
-          icon: Users,
-          permission: "manage_customers",
-        },
         { title: "Drivers", url: "/admin/drivers", icon: Truck, anyPermissions: ["assign_drivers", "view_delivery_history"] },
         { title: "Refunds", url: "/admin/refunds", icon: RotateCcw, permission: "view_refunds" },
+      ],
+    },
+    {
+      title: "INSIGHTS",
+      items: [
+        { title: "Analytics", url: "/admin/analytics", icon: BarChart3, permission: "view_reports" },
+      ],
+    },
+    {
+      title: "ADMINISTRATION",
+      items: [
         { title: "Staff Permissions", url: "/admin/staff", icon: ShieldCheck, superAdmin: true },
         { title: "Shipping Settings", url: "/admin/shipping", icon: Settings, superAdmin: true },
         { title: "Staff Activity", url: "/admin/notifications", icon: Bell, permission: "view_notifications" },
@@ -57,13 +72,13 @@ const data = {
 export function AdminSidebar({ user, ...props }) {
   const location = useLocation();
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar" {...props}>
       {" "}
       <SidebarHeader>
         {" "}
-        <div className="flex min-w-0 items-center gap-3 px-4 py-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+        <div className="flex min-w-0 items-center gap-3 px-4 py-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
           {" "}
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             {" "}
             <Store className="size-5 shrink-0" aria-hidden="true" />{" "}
           </div>{" "}
@@ -83,9 +98,9 @@ export function AdminSidebar({ user, ...props }) {
       <SidebarContent>
         {" "}
         {data.navMain.map((group) => (
-          <SidebarGroup key={group.title}>
+          <SidebarGroup key={group.title} className="px-3 group-data-[collapsible=icon]:px-2">
             {" "}
-            <SidebarGroupLabel> {group.title} </SidebarGroupLabel>{" "}
+            <SidebarGroupLabel className="px-3 text-[10px] font-semibold tracking-[0.12em] text-sidebar-foreground/55"> {group.title} </SidebarGroupLabel>{" "}
             <SidebarGroupContent>
               {" "}
               <SidebarMenu className="gap-1">
@@ -96,22 +111,18 @@ export function AdminSidebar({ user, ...props }) {
                     <SidebarMenuItem key={item.title}>
                       {" "}
                       <SidebarMenuButton
-                        asChild
-                        size="default"
-                        isActive={location.pathname === item.url || (item.url !== "/admin" && location.pathname.startsWith(item.url + "/"))}
-                        tooltip={item.title}
-                      >
-                        {" "}
-                        <Link
+                        render={<Link
                           to={item.url}
                           aria-current={location.pathname === item.url ? "page" : undefined}
-                          className="flex min-w-0 items-center gap-2"
+                          className="flex w-full min-w-0 items-center gap-2.5 px-2.5"
                         >
-                          {" "}
                           <Icon className="size-4 shrink-0" aria-hidden="true" />
-                          <span className="min-w-0 flex-1 truncate">{item.title}</span>{" "}
-                        </Link>{" "}
-                      </SidebarMenuButton>{" "}
+                          <span className="min-w-0 truncate">{item.title}</span>
+                        </Link>}
+                        size="md"
+                        isActive={location.pathname === item.url || (item.url !== "/admin" && location.pathname.startsWith(item.url + "/"))}
+                        tooltip={item.title}
+                      />{" "}
                     </SidebarMenuItem>
                   );
                 })}{" "}
@@ -129,15 +140,10 @@ export function AdminSidebar({ user, ...props }) {
               <SidebarMenuItem>
                 {" "}
                 <SidebarMenuButton
-                  asChild
+                  render={<Link to="/" className="flex w-full items-center gap-2.5 px-2.5"><ArrowLeft aria-hidden="true" /><span>Go back to store</span></Link>}
+                  size="md"
                   tooltip="Go back to store"
-                >
-                  {" "}
-                  <Link to="/" className="flex items-center gap-3">
-                    {" "}
-                    <ArrowLeft aria-hidden="true" /> <span>Go back to store</span>{" "}
-                  </Link>{" "}
-                </SidebarMenuButton>{" "}
+                />{" "}
               </SidebarMenuItem>{" "}
             </SidebarMenu>{" "}
           </SidebarGroupContent>{" "}

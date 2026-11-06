@@ -19,7 +19,7 @@ const DriverHeader = ({ setUser }) => {
   };
 
   return (
-    <header className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm sm:px-5 ">
+    <header className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm sm:px-5">
       <Link
         to="/driver/dashboard"
         className="flex min-h-10 items-center gap-2 font-semibold"
@@ -36,7 +36,7 @@ const DriverHeader = ({ setUser }) => {
               ? "page"
               : undefined
           }
-          className="min-h-10 rounded-lg px-3 py-2 text-sm hover:bg-muted"
+          className={`min-h-10 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-muted ${pathname === "/driver/dashboard" || pathname.startsWith("/driver/deliveries") ? "bg-accent text-accent-foreground" : "text-muted-foreground"}`}
         >
           Deliveries
         </Link>
@@ -44,7 +44,7 @@ const DriverHeader = ({ setUser }) => {
           to="/driver/settings"
           aria-current={pathname === "/driver/settings" ? "page" : undefined}
           aria-label="Driver settings, including delivery alerts"
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-muted ${pathname === "/driver/settings" ? "bg-accent text-accent-foreground" : "text-muted-foreground"}`}
         >
           <Bell size={16} />
           <span className="hidden sm:inline">Settings</span>
@@ -53,7 +53,7 @@ const DriverHeader = ({ setUser }) => {
           type="button"
           aria-label="Log out"
           onClick={logout}
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-sm font-medium hover:bg-muted"
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border px-3 text-sm font-medium transition-colors hover:bg-muted"
         >
           <LogOut size={16} /> <span className="hidden sm:inline">Log out</span>
         </button>

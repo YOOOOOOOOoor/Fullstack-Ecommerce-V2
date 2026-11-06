@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import API from "../../../API/api.js";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Staff = () => {
   const [staff, setStaff] = useState([]);
@@ -68,27 +71,26 @@ const Staff = () => {
     finally { setBusy(false); }
   };
   const change = (id, patch) => setDrafts((previous) => ({ ...previous, [id]: { ...previous[id], ...patch } }));
-  const field = "min-h-11 rounded-lg border bg-background px-3 py-2 text-sm";
   return <main className="space-y-6">
     <header><h1 className="text-3xl font-bold">Staff Permissions</h1><p className="mt-1 text-muted-foreground">Super Admin controls staff activation and least-privilege access.</p></header>
     <form onSubmit={appoint} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] md:items-end">
-      <label htmlFor="staff-account-search" className="space-y-1.5 text-sm font-medium">Find customer
-        <input id="staff-account-search" type="search" className={"w-full " + field} value={accountSearch} onChange={(event) => { setAccountSearch(event.target.value); setUserId(""); }} placeholder="Search by name or email" autoComplete="off" />
-      </label>
-      <label htmlFor="staff-account-select" className="space-y-1.5 text-sm font-medium">Customer account
-        <select id="staff-account-select" className={"w-full " + field} value={userId} onChange={(event) => setUserId(event.target.value)} required disabled={accountsLoading}>
-          <option value="" disabled>{accountsLoading ? "Loading accounts…" : availableAccounts.length ? "Choose an account" : "No matching customer accounts"}</option>
-          {availableAccounts.map((account) => <option key={account.id} value={account.id}>{account.name} — {account.email}</option>)}
-        </select>
-      </label>
-      <button className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50" disabled={busy || accountsLoading || !userId}>Grant staff access</button>
+      <div className="grid min-w-0 content-start gap-1.5"><label htmlFor="staff-account-search" className="block text-sm font-medium leading-5">Find customer</label>
+        <Input id="staff-account-search" type="search" value={accountSearch} onChange={(event) => { setAccountSearch(event.target.value); setUserId(""); }} placeholder="Search by name or email" autoComplete="off" />
+      </div>
+      <div className="grid min-w-0 content-start gap-1.5"><label htmlFor="staff-account-select" className="block text-sm font-medium leading-5">Customer account</label>
+        <Select value={userId || null} onValueChange={(value) => setUserId(value || "")} disabled={accountsLoading}>
+          <SelectTrigger id="staff-account-select" className="w-full"><SelectValue placeholder={accountsLoading ? "Loading accounts…" : availableAccounts.length ? "Choose an account" : "No matching customer accounts"} /></SelectTrigger>
+          <SelectContent>{availableAccounts.length ? availableAccounts.map((account) => <SelectItem key={account.id} value={String(account.id)}>{account.name} — {account.email}</SelectItem>) : <SelectItem value="no-accounts" disabled>{accountsLoading ? "Loading accounts…" : "No matching customer accounts"}</SelectItem>}</SelectContent>
+        </Select>
+      </div>
+      <Button type="submit" disabled={busy || accountsLoading || !userId}>{busy ? "Granting access…" : "Grant staff access"}</Button>
     </form>
     {staff.filter((member) => !member.is_super_admin).map((member) => {
       const draft = drafts[member.id] || { status: member.status || "active", permissions: [] };
       return <article key={member.id} className="space-y-4 rounded-xl border bg-card p-5">
-        <header className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="font-semibold">{member.name}</h2><p className="text-sm text-muted-foreground">{member.email} · Account #{member.id}</p></div><select className={field} value={draft.status} onChange={(event) => change(member.id, { status: event.target.value })}><option value="active">Active</option><option value="suspended">Suspended</option><option value="deactivated">Deactivated</option></select></header>
+        <header className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{member.name}</h2><p className="text-sm text-muted-foreground">{member.email} · Account #{member.id}</p></div><Select value={draft.status} onValueChange={(value) => change(member.id, { status: value })}><SelectTrigger className="w-full sm:w-44" aria-label={`Status for ${member.name}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="suspended">Suspended</SelectItem><SelectItem value="deactivated">Deactivated</SelectItem></SelectContent></Select></header>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{permissionOptions.map((permission) => <label key={permission} className="flex items-start gap-2 rounded-lg border p-3 text-sm"><input type="checkbox" checked={draft.permissions.includes(permission)} onChange={(event) => change(member.id, { permissions: event.target.checked ? [...draft.permissions, permission] : draft.permissions.filter((item) => item !== permission) })} /><span>{permission.replaceAll("_", " ")}</span></label>)}</div>
-        <button type="button" className="min-h-10 rounded-lg bg-primary px-4 font-semibold text-primary-foreground" disabled={busy} onClick={() => save(member)}>Save access</button>
+        <Button type="button" disabled={busy} onClick={() => save(member)}>{busy ? "Saving…" : "Save access"}</Button>
       </article>;
     })}
     {!staff.some((member) => !member.is_super_admin) && <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">No staff accounts yet.</p>}

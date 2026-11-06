@@ -7,6 +7,7 @@ import Edit from "./controllers/Edit.jsx";
 import Delete from "./controllers/Delete.jsx";
 
 import { Spinner } from "@/components/ui/spinner";
+import { formatCategoryName } from "@/lib/categoryDisplay.js";
 
 const Controllers = () => {
   const [category, setCategory] = useState([]);
@@ -180,7 +181,7 @@ const Controllers = () => {
                       text-gray-900
                     "
                       >
-                        {c.name}
+                        {formatCategoryName(c.name)}
                       </h3>
 
                       <p
@@ -207,7 +208,7 @@ const Controllers = () => {
                     font-bold
                   "
                     >
-                      {c.name.charAt(0).toUpperCase()}
+                      {formatCategoryName(c.name).charAt(0)}
                     </div>
                   </div>
 

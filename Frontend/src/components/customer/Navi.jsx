@@ -230,11 +230,12 @@ const Navi = ({ user, setUser }) => {
             justify-between
             rounded-2xl
             border
-            bg-background/80
+            border-border
+            bg-card/95
             backdrop-blur-xl
             shadow-sm
-            px-5
-            py-3
+            px-4
+            py-2.5
             "
         >
           {/* Brand */}
@@ -461,9 +462,10 @@ const Navi = ({ user, setUser }) => {
               mt-3
               rounded-2xl
               border
+              border-border
               bg-card
-              shadow-sm
-              p-5
+              shadow-lg
+              p-4
               space-y-2
             "
           >

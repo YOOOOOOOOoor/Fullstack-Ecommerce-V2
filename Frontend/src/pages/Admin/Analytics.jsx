@@ -28,6 +28,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { adjustCustomRangeStart, buildAnalyticsParams, getChartTickInterval, getMonthName, getQuarterLabel, getReportingYears, QUICK_ANALYTICS_RANGES } from "./analyticsFilters.js";
 import { toSelectItems } from "@/lib/selectOptions.js";
+import { formatCategoryName } from "@/lib/categoryDisplay.js";
 
 const ANALYTICS_TIME_ZONE = "Africa/Addis_Ababa";
 const todayInBusinessZone = () => {
@@ -87,11 +88,7 @@ const AnalyticsSelect = ({ id, value, onChange, options, className = "" }) => (
 const InfoTooltip = ({ label, children }) => (
   <TooltipProvider>
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button type="button" aria-label={label} className="inline-flex size-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <Info aria-hidden="true" size={15} />
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger render={<Button type="button" variant="ghost" size="icon-xs" aria-label={label}><Info aria-hidden="true" size={15} /></Button>} />
       <TooltipContent side="top" arrowClassName="bg-popover fill-popover" className="max-w-xs whitespace-normal rounded-lg border border-border bg-popover px-3 py-2 text-left text-popover-foreground shadow-lg">
         {children}
       </TooltipContent>
@@ -128,7 +125,7 @@ const CategoryTooltip = ({ active, payload, comparisonAvailable, comparisonUnava
   if (!active || !category) return null;
   return (
     <div className="rounded-lg border border-border bg-popover p-3 text-sm text-popover-foreground shadow-lg">
-      <p className="mb-1 font-semibold">{category.name}</p>
+      <p className="mb-1 font-semibold">{formatCategoryName(category.name)}</p>
       <p>{formatETB(category.revenue)} item revenue ({category.revenueShare.toFixed(1)}% of item revenue)</p>
       <p>{category.unitsSold.toLocaleString()} units | {category.orders.toLocaleString()} distinct orders</p>
       {comparisonAvailable && category.revenueChange !== null && <p>vs previous period: {category.revenueChange > 0 ? "+" : ""}{category.revenueChange.toFixed(1)}%</p>}
@@ -697,7 +694,7 @@ const Analytics = () => {
 
       {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
         <span>{error}</span>{" "}
-        <button type="button" onClick={retryAnalytics} className="ml-2 font-semibold underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700">Try again</button>
+        <Button type="button" variant="link" size="sm" onClick={retryAnalytics} className="ml-2 text-destructive">Try again</Button>
       </div>}
 
       <AnalyticsCharts analytics={analytics} colors={COLORS} />
@@ -967,7 +964,7 @@ const AnalyticsPerformanceTables = ({ analytics, productSort, setProductSort }) 
         <TableBody>
           {analytics.revenueByCategory.length === 0 ? <TableRow><TableCell colSpan="6" className="h-24 text-center text-muted-foreground">No category sales in this period.</TableCell></TableRow> : analytics.revenueByCategory.map((category) => (
             <TableRow key={category.category_id ?? "uncategorized"}>
-              <TableCell className="font-medium">{category.name}</TableCell><TableCell>{formatETB(category.revenue)}</TableCell>
+              <TableCell className="font-medium">{formatCategoryName(category.name)}</TableCell><TableCell>{formatETB(category.revenue)}</TableCell>
               <TableCell>{category.unitsSold.toLocaleString()}</TableCell><TableCell>{category.orders.toLocaleString()}</TableCell>
               <TableCell>{category.revenueShare.toFixed(1)}%</TableCell>
               <TableCell>{analytics.comparisonUnavailable ? "Comparison unavailable" : !analytics.comparison ? "Not available for All Time" : category.revenueChange === null ? "No previous baseline" : `${category.revenueChange > 0 ? "+" : ""}${category.revenueChange.toFixed(1)}%`}</TableCell>

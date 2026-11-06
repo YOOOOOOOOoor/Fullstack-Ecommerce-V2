@@ -26,11 +26,7 @@ const Delete = ({ onSuccess, id }) => {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button className="bg-red-500 text-white hover:bg-red-600 cursor-pointer">
-          Delete
-        </Button>
-      </AlertDialogTrigger>
+      <AlertDialogTrigger render={<Button type="button" variant="destructive">Delete</Button>} />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -42,7 +38,7 @@ const Delete = ({ onSuccess, id }) => {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => deleteProduct(id)}
-            className="bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
             {deletingId === id ? "Deleting..." : "Delete"}
           </AlertDialogAction>

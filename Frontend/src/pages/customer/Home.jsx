@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import API from "../../../API/api.js";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { formatCategoryName } from "@/lib/categoryDisplay.js";
 
 const Home = ({ user }) => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -105,8 +106,8 @@ const Home = ({ user }) => {
             <div
               className="
             bg-card
-            border
-            rounded-xl
+            border border-border
+            rounded-2xl
             shadow-sm
             p-3
             "
@@ -118,7 +119,7 @@ const Home = ({ user }) => {
               w-full
               h-[420px]
               object-cover
-              rounded-lg
+              rounded-xl
               "
               />
             </div>
@@ -139,8 +140,8 @@ const Home = ({ user }) => {
         <div
           className="
         bg-card
-        border
-        rounded-xl
+        border border-border
+        rounded-2xl
         shadow-sm
         p-6
         "
@@ -224,8 +225,8 @@ const Home = ({ user }) => {
           <div
             className="
       bg-card
-      border
-      rounded-xl
+      border border-border
+      rounded-2xl
       shadow-sm
       py-16
       px-6
@@ -267,7 +268,7 @@ const Home = ({ user }) => {
           group
           bg-card
           border
-          rounded-xl
+          rounded-2xl
           overflow-hidden
           shadow-sm
           hover:shadow-md
@@ -295,7 +296,7 @@ const Home = ({ user }) => {
                   </h3>
 
                   <p className="text-sm text-muted-foreground">
-                    {product.category_name}
+                    {formatCategoryName(product.category_name)}
                   </p>
 
                   <p className="text-xl font-bold text-primary">

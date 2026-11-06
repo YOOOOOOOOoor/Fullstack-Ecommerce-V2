@@ -97,7 +97,7 @@ const MetricCard = ({ title, value, icon: Icon, comparison, comparisonMetric, co
       </div>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild><button type="button" aria-label={`About ${title}`} className="rounded-full p-1 text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"><CircleHelp size={15} /></button></TooltipTrigger>
+          <TooltipTrigger render={<Button type="button" variant="ghost" size="icon-xs" aria-label={`About ${title}`}><CircleHelp size={15} /></Button>} />
           <TooltipContent className="max-w-64">{tooltip}</TooltipContent>
         </Tooltip>
       </TooltipProvider>

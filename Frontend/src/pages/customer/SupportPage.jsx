@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import API from "../../../API/api.js";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 const blankFaq = { question: "", answer: "", is_published: false };
-const inputClass = "min-h-11 w-full rounded-lg border bg-background px-3 py-2 text-foreground";
+const inputClass = "w-full";
 
 const SupportPage = ({ adminMode = false }) => {
   const [faqs, setFaqs] = useState([]);
@@ -77,18 +80,18 @@ const SupportPage = ({ adminMode = false }) => {
     {adminMode && <section className="space-y-6 rounded-2xl border bg-card p-5 sm:p-7">
       <div><h2 className="text-xl font-semibold">Manage customer support</h2><p className="mt-1 text-sm text-muted-foreground">Changes are saved to the store database and shown to customers.</p></div>
       <form className="grid gap-3 sm:grid-cols-2" onSubmit={saveContact}>
-        <label className="space-y-1 text-sm">Support email<input className={inputClass} type="email" maxLength={254} value={contact.support_email} onChange={(event) => setContact({ ...contact, support_email: event.target.value })} /></label>
-        <label className="space-y-1 text-sm">Support phone<input className={inputClass} type="tel" maxLength={40} value={contact.support_phone} onChange={(event) => setContact({ ...contact, support_phone: event.target.value })} /></label>
-        <button disabled={saving} className="min-h-10 w-fit rounded-lg bg-primary px-4 font-medium text-primary-foreground disabled:opacity-50">Save contact</button>
+        <label className="space-y-1 text-sm">Support email<Input className={inputClass} type="email" maxLength={254} value={contact.support_email} onChange={(event) => setContact({ ...contact, support_email: event.target.value })} /></label>
+        <label className="space-y-1 text-sm">Support phone<Input className={inputClass} type="tel" maxLength={40} value={contact.support_phone} onChange={(event) => setContact({ ...contact, support_phone: event.target.value })} /></label>
+        <Button type="submit" disabled={saving} className="w-fit">Save contact</Button>
       </form>
       <form className="space-y-3 border-t pt-5" onSubmit={saveFaq}>
         <h3 className="font-semibold">{editing ? "Edit FAQ" : "Add FAQ"}</h3>
-        <input className={inputClass} required minLength={5} maxLength={240} placeholder="Question" value={draft.question} onChange={(event) => setDraft({ ...draft, question: event.target.value })} />
-        <textarea className={`${inputClass} min-h-28`} required minLength={10} maxLength={5000} placeholder="Answer" value={draft.answer} onChange={(event) => setDraft({ ...draft, answer: event.target.value })} />
+        <Input className={inputClass} required minLength={5} maxLength={240} placeholder="Question" value={draft.question} onChange={(event) => setDraft({ ...draft, question: event.target.value })} />
+        <Textarea className={`${inputClass} min-h-28`} required minLength={10} maxLength={5000} placeholder="Answer" value={draft.answer} onChange={(event) => setDraft({ ...draft, answer: event.target.value })} />
         <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" checked={draft.is_published} onChange={(event) => setDraft({ ...draft, is_published: event.target.checked })} />Published to customers</label>
-        <div className="flex gap-2"><button disabled={saving} className="min-h-10 rounded-lg bg-primary px-4 font-medium text-primary-foreground disabled:opacity-50">{editing ? "Save changes" : "Add FAQ"}</button>{editing && <button type="button" className="min-h-10 rounded-lg border px-4" onClick={() => { setEditing(null); setDraft(blankFaq); }}>Cancel</button>}</div>
+        <div className="flex gap-2"><Button type="submit" disabled={saving}>{editing ? "Save changes" : "Add FAQ"}</Button>{editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setDraft(blankFaq); }}>Cancel</Button>}</div>
       </form>
-      <div className="space-y-2 border-t pt-5">{faqs.map((faq, index) => <div key={faq.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"><div><p className="font-medium">{faq.question}</p><p className="text-xs text-muted-foreground">{faq.is_published ? "Published" : "Draft"}</p></div><div className="flex flex-wrap gap-2"><button disabled={saving || index === 0} className="rounded border px-2 py-1 text-sm disabled:opacity-40" aria-label="Move FAQ up" onClick={() => moveFaq(index, -1)}>↑</button><button disabled={saving || index === faqs.length - 1} className="rounded border px-2 py-1 text-sm disabled:opacity-40" aria-label="Move FAQ down" onClick={() => moveFaq(index, 1)}>↓</button><button className="rounded border px-3 py-1 text-sm" onClick={() => toggleFaq(faq)}>{faq.is_published ? "Unpublish" : "Publish"}</button><button className="rounded border px-3 py-1 text-sm" onClick={() => editFaq(faq)}>Edit</button><button className="rounded border border-destructive px-3 py-1 text-sm text-destructive" onClick={() => deleteFaq(faq)}>Delete</button></div></div>)}</div>
+      <div className="space-y-2 border-t pt-5">{faqs.map((faq, index) => <div key={faq.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"><div><p className="font-medium">{faq.question}</p><p className="text-xs text-muted-foreground">{faq.is_published ? "Published" : "Draft"}</p></div><div className="flex flex-wrap gap-2"><Button type="button" variant="outline" size="icon-sm" disabled={saving || index === 0} aria-label="Move FAQ up" onClick={() => moveFaq(index, -1)}>↑</Button><Button type="button" variant="outline" size="icon-sm" disabled={saving || index === faqs.length - 1} aria-label="Move FAQ down" onClick={() => moveFaq(index, 1)}>↓</Button><Button type="button" variant="outline" size="sm" onClick={() => toggleFaq(faq)}>{faq.is_published ? "Unpublish" : "Publish"}</Button><Button type="button" variant="outline" size="sm" onClick={() => editFaq(faq)}>Edit</Button><Button type="button" variant="destructive" size="sm" onClick={() => deleteFaq(faq)}>Delete</Button></div></div>)}</div>
     </section>}
     <section aria-labelledby="faq-list-heading"><h2 id="faq-list-heading" className="mb-4 text-xl font-semibold">Frequently asked questions</h2>{loading ? <p className="rounded-xl border bg-card p-6 text-muted-foreground">Loading support information…</p> : faqs.length ? <div className="space-y-3">{faqs.map((faq) => {
           const isOpen = openFaqId === faq.id;

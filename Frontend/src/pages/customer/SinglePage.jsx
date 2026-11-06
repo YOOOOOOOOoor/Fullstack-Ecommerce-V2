@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useCustomerShop } from "../../context/CustomerShopContext.jsx";
+import { formatCategoryName } from "@/lib/categoryDisplay.js";
 
 const SinglePage = () => {
   const [loading, setLoading] = useState(true);
@@ -350,7 +351,7 @@ const SinglePage = () => {
                 text-muted-foreground
                 "
                   >
-                    {product.category_name}
+                    {formatCategoryName(product.category_name)}
                   </p>
 
                   <h1
@@ -931,7 +932,7 @@ const SinglePage = () => {
                   mt-1
                   "
                     >
-                      {item.category_name}
+                      {formatCategoryName(item.category_name)}
                     </p>
 
                     <p

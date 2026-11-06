@@ -11,7 +11,7 @@ import { playAssignmentSound } from "./driverPortalUtils.js";
 import { useDriverPreferences } from "./driverPreferences.js";
 import { decodeVapidPublicKey, getDriverPushState, setDriverPushRegistered } from "./driverPushNotifications.js";
 
-const card = "space-y-5 rounded-3xl border bg-card p-5 shadow-sm sm:p-7";
+const card = "space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7";
 
 const DriverSettings = ({ user, setUser }) => {
   const [profile, setProfile] = useState({ name: "", email: "", phone: "", avatar: "" });

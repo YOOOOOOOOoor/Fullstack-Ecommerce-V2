@@ -43,6 +43,7 @@ import {
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { toSelectItems } from "@/lib/selectOptions.js";
+import { formatCategoryName } from "@/lib/categoryDisplay.js";
 
 const Edit = () => {
   const navigate = useNavigate();
@@ -531,7 +532,7 @@ const Edit = () => {
 
               <Select
                 value={form.category_id}
-                items={toSelectItems(category.map((c) => ({ value: c.id, label: c.name })))}
+                items={toSelectItems(category.map((c) => ({ value: c.id, label: formatCategoryName(c.name) })))}
                 onValueChange={(value) =>
                   setForm({
                     ...form,
@@ -549,7 +550,7 @@ const Edit = () => {
 
                     {category.map((c) => (
                       <SelectItem key={c.id} value={String(c.id)}>
-                        {c.name}
+                        {formatCategoryName(c.name)}
                       </SelectItem>
                     ))}
                   </SelectGroup>

@@ -203,9 +203,9 @@ const DriverPortal = ({ user, setUser }) => {
 
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-background"><Spinner className="size-8" /></div>;
 
-  const panel = "rounded-2xl border bg-card p-5 shadow-sm";
-  const input = "min-h-11 w-full min-w-0 rounded-lg border bg-background px-3 py-2 text-foreground";
-  const button = "min-h-11 rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground disabled:opacity-50";
+  const panel = "rounded-2xl border border-border bg-card p-5 shadow-sm";
+  const input = "min-h-11 w-full min-w-0 rounded-xl border border-input bg-card px-3 py-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40";
+  const button = "min-h-11 rounded-xl bg-primary px-4 py-2 font-semibold text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-50";
 
   if (!id) {
     const deliveries = getDriverDeliveries(dashboard);

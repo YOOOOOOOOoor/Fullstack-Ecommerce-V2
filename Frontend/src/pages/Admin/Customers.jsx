@@ -5,6 +5,8 @@ import ProfileAvatar from "@/components/customer/ProfileAvatar.jsx";
 
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -205,7 +207,7 @@ const Customers = () => {
         gap-3
         "
         >
-          <input
+          <Input
             placeholder="Search customers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -214,18 +216,7 @@ const Customers = () => {
                 handleSearch();
               }
             }}
-            className="
-          border
-          border-border
-          bg-background
-          text-foreground
-          placeholder:text-muted-foreground
-          rounded-lg
-          px-4
-          py-2
-          w-full
-          sm:w-64
-          "
+          className="w-full sm:w-64"
           />
 
           <Select
@@ -458,27 +449,14 @@ const Customers = () => {
               "
               >
                 {user.is_super_admin ? <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Protected Super Admin account</p> : currentUser?.is_super_admin ? <div className="grid grid-cols-2 gap-2">
-                  {user.account_type !== "driver" && user.driver_status !== "revoked" && <button className="rounded-lg border border-primary px-2 py-2 text-sm font-medium text-primary hover:bg-accent" onClick={() => openAccountChange(user, "driver")}>Promote to Driver</button>}
+                  {user.account_type !== "driver" && user.driver_status !== "revoked" && <Button type="button" variant="outline" size="sm" className="border-primary text-primary hover:bg-accent" onClick={() => openAccountChange(user, "driver")}>Promote to Driver</Button>}
                   {user.driver_status === "revoked" && <p className="col-span-2 text-xs text-muted-foreground">This driver was permanently offboarded and cannot be reactivated.</p>}
-                  {user.account_type !== "staff" && <button className="rounded-lg border border-primary px-2 py-2 text-sm font-medium text-primary hover:bg-accent" onClick={() => openAccountChange(user, "staff")}>Promote to Staff</button>}
-                  {user.account_type !== "customer" && <button className="col-span-2 rounded-lg border px-2 py-2 text-sm font-medium hover:bg-accent" onClick={() => openAccountChange(user, "customer")}>Return to Customer</button>}
+                  {user.account_type !== "staff" && <Button type="button" variant="outline" size="sm" className="border-primary text-primary hover:bg-accent" onClick={() => openAccountChange(user, "staff")}>Promote to Staff</Button>}
+                  {user.account_type !== "customer" && <Button type="button" variant="outline" size="sm" className="col-span-2" onClick={() => openAccountChange(user, "customer")}>Return to Customer</Button>}
                 </div> : <p className="text-sm text-muted-foreground">Account type: {user.account_type?.replaceAll("_", " ") || user.role}</p>}
 
                 {!user.is_super_admin && <AlertDialog>
-                  <AlertDialogTrigger
-                    className="
-                  w-full
-                  bg-red-600
-                  text-white
-                  py-2
-                  rounded-lg
-                  text-sm
-                  hover:bg-red-700
-                  transition
-                  "
-                  >
-                    Delete Account
-                  </AlertDialogTrigger>
+                  <AlertDialogTrigger render={<Button type="button" variant="destructive" className="w-full">Delete Account</Button>} />
 
                   <AlertDialogContent>
                     <AlertDialogHeader>
@@ -495,10 +473,7 @@ const Customers = () => {
 
                       <AlertDialogAction
                         disabled={deletingId === user.id}
-                        className="
-                      bg-red-600
-                      hover:bg-red-700
-                      "
+                        className="bg-destructive text-white hover:bg-destructive/90"
                         onClick={() => deleteUser(user.id)}
                       >
                         {deletingId === user.id ? "Deleting..." : "Delete"}
