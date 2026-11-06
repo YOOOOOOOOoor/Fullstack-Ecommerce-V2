@@ -15,9 +15,15 @@ psql "$DATABASE_URL" -f database/migrations/20261030_staff_activity_chapa_contin
 psql "$DATABASE_URL" -f database/migrations/20261031_checkout_idempotency.sql
 psql "$DATABASE_URL" -f database/migrations/20261101_pre_dispatch_cancellation_refunds.sql
 psql "$DATABASE_URL" -f database/migrations/20261102_driver_web_push.sql
+psql "$DATABASE_URL" -f database/migrations/20261103_google_accounts_nullable_password.sql
+psql "$DATABASE_URL" -f database/migrations/20261105_visitor_analytics.sql
 ```
 
-The latest migration adds the pre-dispatch cancellation refund-review fields and safely backfills prior successful customer cancellations using their `order.customer_cancelled` audit entries. It does not contact Chapa or change payment statuses.
+`20261103_google_accounts_nullable_password.sql` allows Google-authenticated users to have a `NULL` local password. Apply it to an existing database before deploying Google account registration that stores passwordless accounts. It does not alter existing user rows or provider values.
+
+`20261105_visitor_analytics.sql` creates anonymous visitor, session, and page-view tables. Visitor records inactive for 13 months and page-view/session records older than 13 months are removed by the backend retention worker. The visitor endpoint reports the earliest retained page-view date and marks ranges before that date as partial.
+
+`20261101_pre_dispatch_cancellation_refunds.sql` adds the pre-dispatch cancellation refund-review fields and safely backfills prior successful customer cancellations using their `order.customer_cancelled` audit entries. It does not contact Chapa or change payment statuses.
 
 `20261102_driver_web_push.sql` adds per-driver Web Push subscriptions. Apply this migration to the target database before enabling Web Push on the deployed API. Do not apply migrations to production until the target connection has been confirmed.
 
